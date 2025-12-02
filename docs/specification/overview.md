@@ -66,7 +66,7 @@ You can include diagrams using various formats:
 SVG images are natively supported by MkDocs Material:
 
 ```markdown
-![Architecture Diagram](../assets/diagram.svg)
+![Architecture Diagram](../assets/example-floor-plan.svg)
 ```
 
 #### Draw.io Example
@@ -78,6 +78,8 @@ Draw.io diagrams can be embedded directly:
 ```
 
 The Draw.io exporter plugin will automatically convert these to images during the build process.
+
+**Note**: Draw.io files require the Draw.io desktop application. Add `.drawio` files to the `docs/assets/` directory and uncomment the plugin configuration in `mkdocs.yml`.
 
 ## Validation
 

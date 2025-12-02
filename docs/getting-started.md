@@ -31,7 +31,7 @@ Here's a simple example of an OAS structure:
 
 ```json
 {
-  "version": "1.0",
+  "version": "1.0.0",
   "layout": {
     "id": "example-layout",
     "rooms": [

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <style>
+      .room { fill: #e3f2fd; stroke: #1976d2; stroke-width: 2; }
+      .wall { stroke: #424242; stroke-width: 3; fill: none; }
+      .label { font-family: Arial, sans-serif; font-size: 14px; fill: #424242; text-anchor: middle; }
+      .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #1976d2; text-anchor: middle; }
+    </style>
+  </defs>
+  
+  <!-- Title -->
+  <text x="200" y="25" class="title">Example Floor Plan</text>
+  
+  <!-- Room boundary -->
+  <rect x="50" y="50" width="300" height="200" class="room"/>
+  
+  <!-- Walls -->
+  <line x1="50" y1="50" x2="350" y2="50" class="wall"/>
+  <line x1="350" y1="50" x2="350" y2="250" class="wall"/>
+  <line x1="350" y1="250" x2="50" y2="250" class="wall"/>
+  <line x1="50" y1="250" x2="50" y2="50" class="wall"/>
+  
+  <!-- Door opening -->
+  <line x1="170" y1="250" x2="230" y2="250" style="stroke: #4caf50; stroke-width: 4;"/>
+  
+  <!-- Labels -->
+  <text x="200" y="150" class="label">Living Room</text>
+  <text x="200" y="170" class="label" style="font-size: 12px; fill: #666;">5000mm × 4000mm</text>
+  
+  <!-- Door label -->
+  <text x="200" y="275" style="font-size: 11px; fill: #4caf50; font-family: Arial, sans-serif; text-anchor: middle;">Door (900mm)</text>
+  
+  <!-- Coordinates -->
+  <text x="45" y="45" style="font-size: 10px; fill: #999; font-family: Arial, sans-serif;">(0,0)</text>
+  <text x="355" y="260" style="font-size: 10px; fill: #999; font-family: Arial, sans-serif;">(5000,4000)</text>
+</svg>

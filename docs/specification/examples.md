@@ -263,10 +263,14 @@ An example showing a non-rectangular room:
 You can include SVG diagrams directly in your documentation:
 
 ```markdown
-![Floor Plan](../assets/floor-plan.svg)
+![Floor Plan](../assets/example-floor-plan.svg)
 ```
 
 SVG format is natively supported by browsers and MkDocs Material, providing crisp, scalable diagrams.
+
+Here's an example SVG diagram:
+
+![Example Floor Plan](../assets/example-floor-plan.svg)
 
 ### Draw.io Diagrams
 
@@ -277,6 +281,8 @@ For Draw.io diagrams, simply reference the `.drawio` file:
 ```
 
 The `mkdocs-drawio-exporter` plugin will automatically convert these to PNG images during the build process.
+
+**Note**: Draw.io integration requires the Draw.io desktop application to be installed. See the main README for setup instructions.
 
 ### Mermaid Diagrams
 
