@@ -77,9 +77,13 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Getting Started: getting-started.md
-  - Specification:
-    - Overview: specification/overview.md
-    - Schema: specification/schema.md
-    - Examples: specification/examples.md
-  - About: about.md
+  - Core: core.md
+  - Geometry: geometry.md
+  - Program: program.md
+  - Layout: layout.md
+  - Render: render.md
+  - Extensions: extensions.md
+  - Glossary: glossary.md
+  - Examples:
+    - Simple Plan: examples/simple_plan.md
+    - Multi-Room Plan: examples/multi_room_plan.md
