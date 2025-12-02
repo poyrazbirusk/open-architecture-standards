@@ -327,10 +327,6 @@ Add furniture information:
 }
 ```
 
-## File Download
-
-[Download this example as JSON](simple_plan.json){ .md-button }
-
 ---
 
 *This is a basic example to help you get started with OAS. For more complex layouts, see the [Multi-Room Plan Example](multi_room_plan.md).*
