@@ -1,0 +1,21 @@
+{
+  "name": "Open Architecture Standards - Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "extensions": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "yzhang.markdown-all-in-one",
+    "yzhang.markdown-preview-enhanced",
+    "redhat.vscode-yaml"
+  ],
+  "postCreateCommand": "python -m pip install --upgrade pip && pip install -r requirements.txt",
+  "remoteUser": "vscode"
+}

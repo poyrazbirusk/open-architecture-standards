@@ -1,0 +1,92 @@
+site_name: Open Architecture Standards
+site_description: Open Architecture Standards (OAS) - A lightweight, LLM-friendly schema for describing architectural layouts
+site_author: poyrazbirusk
+repo_url: https://github.com/poyrazbirusk/open-architecture-standards
+repo_name: poyrazbirusk/open-architecture-standards
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: '#0b3d91'
+      accent: '#0f69ff'
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+      primary: '#0b3d91'
+      accent: '#0f69ff'
+
+plugins:
+  - search
+  - glightbox:
+      touchNavigation: true
+      loop: false
+      effect: zoom
+      slide_effect: slide
+      width: 100%
+      height: auto
+      zoomable: true
+      draggable: true
+  # Draw.io exporter - requires Draw.io desktop app or drawio-desktop-headless
+  # Uncomment and configure when Draw.io is available:
+  # - drawio-exporter:
+  #     drawio_executable: /path/to/drawio
+  #     format: png
+  #     embed_format: '{img_open}{img_src}{img_close}'
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - attr_list
+  - md_in_html
+  - def_list
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Core: core.md
+  - Geometry: geometry.md
+  - Program: program.md
+  - Layout: layout.md
+  - Render: render.md
+  - Extensions: extensions.md
+  - Glossary: glossary.md
+  - Examples:
+    - Simple Plan: examples/simple_plan.md
+    - Multi-Room Plan: examples/multi_room_plan.md
+
+extra_css:
+  - 'assets/overrides.css'

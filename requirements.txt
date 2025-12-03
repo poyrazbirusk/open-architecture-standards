@@ -1,0 +1,10 @@
+# MkDocs with Material theme
+mkdocs>=1.5.0
+mkdocs-material>=9.5.0
+
+# Draw.io integration
+mkdocs-drawio-exporter>=0.8.0
+
+# SVG support and additional plugins
+mkdocs-glightbox>=0.3.0
+pymdown-extensions>=10.0

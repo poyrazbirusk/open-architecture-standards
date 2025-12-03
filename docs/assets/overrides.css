@@ -1,0 +1,8 @@
+/* Overrides for visual tweaks and hiding MkDocs attribution */
+
+/* Hide only the Material for MkDocs footer attribution text/link */
+.md-copyright { display: none !important; }
+
+/* If you want to keep the footer container but remove only the attribution link, use:
+.md-footer .md-copyright { display: none !important; }
+*/
