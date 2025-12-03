@@ -1,456 +1,298 @@
-# Extensions
+# OAS-Extensions
 
-This page describes how to extend OAS with custom properties and vendor-specific features.
+OAS-Extensions defines the **modular expansion system** for the Open Architecture Standards.  
+While OAS-Core establishes the essential schema, Extensions allow projects to add **domain-specific functionality** without altering the core standard.
 
-## Overview
+Extensions ensure that OAS can evolve to support:
+- furniture
+- MEP (mechanical, electrical, plumbing)
+- 3D geometry
+- site plans
+- materials
+- environmental data
+- accessibility metadata
+- custom organization-specific modules
 
-OAS is designed to be extensible, allowing you to add custom properties without breaking compatibility with standard tools. Extensions enable:
+Each extension is versioned independently and integrates cleanly with OAS-Core and OAS-Geometry.
 
-- Domain-specific metadata
-- Vendor-specific features
-- Experimental capabilities
-- Integration with other systems
+---
 
-## Extension Naming
+## 1. Purpose of OAS Extensions
 
-Custom properties must use the `x-` prefix to avoid conflicts with future standard properties.
+Extensions serve to:
 
-### Valid Extensions
+- Add optional capabilities  
+- Remain backward-compatible  
+- Avoid bloating the core specification  
+- Enable specialized workflows  
+- Allow communities to define their own modules  
 
-```json
-{
-  "id": "room-1",
-  "name": "Living Room",
-  "x-custom-property": "value",
-  "x-vendor-specific": {...}
-}
+OAS encourages a **modular ecosystem**, similar to:
+- OpenAPI extensions  
+- IFC partial schemas  
+- Web standards “levels”  
+
+Extensions must never break the guarantees provided by OAS-Core.
+
+---
+
+## 2. Extension Naming & Versioning
+
+Extensions use the following naming pattern:
+
+```
+oas-{domain}-{version}
 ```
 
-### Invalid Extensions
+Examples:
+
+- `oas-furniture-1.0.0`
+- `oas-mep-1.0.0`
+- `oas-3d-1.0.0`
+- `oas-materials-1.1.0`
+- `oas-site-0.9.0`
+
+### Versioning Rules
+- Must follow **semantic versioning** (semver).  
+- Must specify compatibility with `oas` core version.  
+- Minor versions may add fields.  
+- Major versions may break extension internals, but never OAS-Core rules.
+
+---
+
+## 3. Extension Declaration
+
+An OAS document may include extensions via the `extensions` field.
+
+### Example:
 
 ```json
 {
-  "id": "room-1",
-  "name": "Living Room",
-  "custom-property": "value",  // ❌ Missing x- prefix
-  "vendorSpecific": {...}      // ❌ Missing x- prefix
-}
-```
-
-## Common Extensions
-
-### Material Properties
-
-Specify material information for elements:
-
-```json
-{
-  "id": "wall-1",
-  "thickness": 200,
-  "x-material": {
-    "type": "concrete",
-    "finish": "painted",
-    "color": "#FFFFFF",
-    "thermal-resistance": 2.5,
-    "fire-rating": 120
-  }
-}
-```
-
-### Height Information
-
-Add height data to elements:
-
-```json
-{
-  "id": "room-1",
-  "name": "Living Room",
-  "boundaries": [...],
-  "x-ceiling-height": 2800,
-  "x-floor-elevation": 0,
-  "x-ceiling-type": "suspended"
-}
-```
-
-### Furniture and Fixtures
-
-Include furniture and fixture data:
-
-```json
-{
-  "id": "bedroom",
-  "name": "Master Bedroom",
-  "boundaries": [...],
-  "x-furniture": [
-    {
-      "type": "bed",
-      "model": "king",
-      "position": {"x": 2000, "y": 2000},
-      "rotation": 0,
-      "dimensions": {"width": 1800, "length": 2000, "height": 600}
-    },
-    {
-      "type": "nightstand",
-      "position": {"x": 3000, "y": 2000},
-      "dimensions": {"width": 500, "length": 400, "height": 500}
-    }
+  "oas": "1.0.0",
+  "extensions": [
+    { "name": "oas-furniture", "version": "1.0.0" },
+    { "name": "oas-3d", "version": "1.0.0" }
   ]
 }
 ```
 
-### MEP Systems
+The presence of an extension implies:
 
-Mechanical, Electrical, and Plumbing information:
+- Additional fields may be used  
+- Additional entities may be allowed  
+- Renderers/editors should load the relevant extension handlers  
+
+Documents must still remain valid OAS regardless of extensions.
+
+---
+
+## 4. Extension Structure Requirements
+
+Every extension must include:
+
+### 4.1 Metadata
+- extension name  
+- version  
+- description  
+- authors (optional)
+
+### 4.2 Entities
+The extension must define its own entities using OAS-style patterns:
+- JSON objects  
+- snake_case keys  
+- mm-based coordinates (when geometric)  
+- integer geometry rules must be respected
+
+### 4.3 Integration Rules
+Extensions must define:
+- what core entities they modify or reference  
+- how they interact with layout or render modules  
+- any conflicts or invariants  
+
+---
+
+## 5. Official OAS Extensions (Initial Set)
+
+Below are recommended baseline extensions that the ecosystem may adopt.
+
+---
+
+### 5.1 OAS-Furniture
+
+Defines furniture elements placed inside rooms.
+
+Includes:
+- bounding polygons or footprints  
+- rotation  
+- clearance zones  
+- category (bed, sofa, table)  
+
+Example furniture entity:
 
 ```json
 {
-  "id": "kitchen",
-  "name": "Kitchen",
-  "boundaries": [...],
-  "x-mep": {
-    "electrical": {
-      "outlets": [
-        {"position": {"x": 1000, "y": 0}, "type": "standard", "voltage": 120},
-        {"position": {"x": 3000, "y": 0}, "type": "gfci", "voltage": 120}
-      ],
-      "switches": [
-        {"position": {"x": 5000, "y": 1500}, "controls": ["ceiling-light"]}
-      ],
-      "lighting": [
-        {"id": "ceiling-light", "type": "recessed", "count": 4}
-      ]
-    },
-    "plumbing": {
-      "fixtures": [
-        {"type": "sink", "position": {"x": 2000, "y": 0}},
-        {"type": "dishwasher", "position": {"x": 3500, "y": 0}}
-      ],
-      "supply": [
-        {"type": "hot-water", "position": {"x": 2000, "y": 0}},
-        {"type": "cold-water", "position": {"x": 2000, "y": 0}}
-      ]
-    },
-    "hvac": {
-      "vents": [
-        {"type": "supply", "position": {"x": 3000, "y": 1500}},
-        {"type": "return", "position": {"x": 1000, "y": 1500}}
-      ]
-    }
+  "type": "bed",
+  "id": "bed_01",
+  "position": { "x": 1200, "y": 2400 },
+  "rotation_deg": 0,
+  "footprint": {
+    "points": [
+      { "x": 0, "y": 0 },
+      { "x": 2000, "y": 0 },
+      { "x": 2000, "y": 1600 },
+      { "x": 0, "y": 1600 }
+    ]
   }
 }
 ```
 
-### Building Code
+---
 
-Building code and compliance information:
+### 5.2 OAS-MEP
 
-```json
-{
-  "id": "commercial-suite",
-  "name": "Office Suite",
-  "boundaries": [...],
-  "x-code-compliance": {
-    "occupancy-type": "B",
-    "occupant-load": 20,
-    "exit-requirements": {
-      "exits-required": 2,
-      "exit-distance": 60000,
-      "exit-width": 900
-    },
-    "accessibility": {
-      "ada-compliant": true,
-      "accessible-route": true,
-      "accessible-toilet": true
-    },
-    "fire-safety": {
-      "sprinklered": true,
-      "fire-alarm": true,
-      "smoke-detectors": 3
-    }
-  }
-}
-```
+Mechanical, electrical, plumbing representations.
 
-### Energy Analysis
+May include:
+- ducts  
+- pipes  
+- electrical circuits  
+- fixtures  
+- mechanical units  
+- diagrams for drainage or supply  
 
-Energy performance data:
+All geometry still uses mm integer rules.
+
+---
+
+### 5.3 OAS-3D
+
+Adds a 3D layer using extrusions and heights.
+
+Includes:
+- floor heights  
+- ceiling heights  
+- extruded wall geometry  
+- vertical openings  
+- 3D furniture  
+
+Example:
 
 ```json
 {
-  "layout": {
-    "id": "building-a",
-    "x-energy": {
-      "climate-zone": "4A",
-      "orientation": 0,
-      "envelope": {
-        "wall-r-value": 19,
-        "roof-r-value": 38,
-        "window-u-value": 0.3,
-        "infiltration-rate": 3.0
-      },
-      "systems": {
-        "heating": "natural-gas",
-        "cooling": "electric",
-        "ventilation": "mechanical",
-        "dhw": "natural-gas"
-      }
-    }
-  }
+  "wall_height_mm": 2800,
+  "ceiling_height_mm": 2550
 }
 ```
 
-### Rendering Hints
+---
 
-Provide hints for rendering engines:
+### 5.4 OAS-Materials
+
+Describes materials, finishes, and construction types.
+
+Examples:
+- wall materials  
+- flooring types  
+- reflectivity parameters  
+- thermal properties  
+
+Example:
 
 ```json
 {
-  "id": "room-1",
-  "name": "Living Room",
-  "boundaries": [...],
-  "x-render": {
-    "camera-position": {"x": 3000, "y": 2000, "z": 1500},
-    "camera-target": {"x": 3000, "y": 3000, "z": 0},
-    "lighting": "natural",
-    "shadow-quality": "high",
-    "materials": {
-      "floor": "hardwood-oak",
-      "walls": "paint-white",
-      "ceiling": "paint-white"
-    }
-  }
+  "material_id": "wall_paint_white",
+  "type": "paint",
+  "color_hex": "#ffffff",
+  "reflectance": 0.72
 }
 ```
 
-### Cost Estimation
+---
 
-Construction cost information:
+### 5.5 OAS-Site
+
+Defines the building context:
+
+- property boundaries  
+- setbacks  
+- orientation (north arrow)  
+- slope data  
+- topography  
+- access points  
+
+Example:
 
 ```json
 {
-  "id": "wall-1",
-  "thickness": 200,
-  "x-cost": {
-    "material-cost": 45.50,
-    "labor-cost": 32.00,
-    "unit": "per-linear-meter",
-    "currency": "USD",
-    "date": "2024-01-01"
-  }
+  "north_angle_deg": 0,
+  "site_boundary_polygon": { ... }
 }
 ```
 
-### Scheduling
+---
 
-Construction schedule data:
+## 6. Custom Extensions
+
+Projects may define custom extensions:
+
+Example:
+
+```
+oas-hospital
+oas-retail
+oas-lab
+oas-classroom
+```
+
+Custom modules should:
+
+- follow naming conventions  
+- use semver  
+- not break OAS-Core invariants  
+- provide clear documentation  
+
+---
+
+## 7. Render Integrations
+
+Extensions may include *render hints*, such as:
 
 ```json
 {
-  "id": "room-1",
-  "name": "Living Room",
-  "boundaries": [...],
-  "x-schedule": {
-    "start-date": "2024-06-01",
-    "end-date": "2024-06-15",
-    "duration": 14,
-    "unit": "days",
-    "dependencies": ["foundation", "framing"],
-    "crew-size": 4
-  }
+  "color_hex": "#55aaff",
+  "icon": "furniture-bed"
 }
 ```
 
-## Vendor Extensions
+These are optional and renderer-specific.
 
-Vendors can define their own extension namespaces:
+---
 
-### Example: Autodesk Extension
+## 8. Interaction With OAS-Core, Geometry, Layout
 
-```json
-{
-  "id": "wall-1",
-  "x-autodesk": {
-    "revit-family": "Basic Wall",
-    "revit-type": "Generic - 200mm",
-    "element-id": "1234567"
-  }
-}
-```
+### Extensions **may not**:
 
-### Example: Custom Tool Extension
+- override core geometry rules  
+- change mm-integer coordinate rules  
+- redefine base types (room, wall, opening)
 
-```json
-{
-  "id": "room-1",
-  "x-mycompany-tool": {
-    "version": "2.0",
-    "generated-by": "MyCompanyTool",
-    "custom-data": {
-      "feature-a": true,
-      "feature-b": "value"
-    }
-  }
-}
-```
+### Extensions **may**:
 
-## Extension Guidelines
+- attach metadata to core entities  
+- introduce new entity types  
+- define reference relationships  
+- add new layers for visualization  
 
-### Naming Conventions
+---
 
-Use clear, descriptive names with kebab-case:
+## 9. Summary
 
-- ✅ `x-ceiling-height`
-- ✅ `x-material-type`
-- ✅ `x-cost-estimate`
-- ❌ `x-ch` (too abbreviated)
-- ❌ `x-ceilingHeight` (use kebab-case)
+OAS-Extensions provide a structured, modular way to expand the core Open Architecture Standards without breaking compatibility.
 
-### Data Structure
+Extensions:
+- add optional capabilities  
+- define specialized behavior  
+- support complex domains (furniture, MEP, 3D, site)  
+- keep OAS lean, stable, and future-proof  
 
-Keep extensions well-structured:
-
-```json
-// Good: Organized structure
-{
-  "x-lighting": {
-    "fixtures": [...],
-    "controls": [...],
-    "circuits": [...]
-  }
-}
-
-// Bad: Flat structure
-{
-  "x-lighting-fixtures": [...],
-  "x-lighting-controls": [...],
-  "x-lighting-circuits": [...]
-}
-```
-
-### Documentation
-
-Document your extensions:
-
-```json
-{
-  "$schema": "https://example.com/my-extension-schema.json",
-  "x-my-extension": {
-    "version": "1.0",
-    "documentation": "https://example.com/docs/extension"
-  }
-}
-```
-
-### Compatibility
-
-Ensure extensions don't break standard parsers:
-
-- Use valid JSON
-- Don't override standard properties
-- Make extensions optional
-- Provide defaults when possible
-
-## Extension Schemas
-
-Define JSON schemas for your extensions:
-
-```json
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "OAS Material Extension",
-  "type": "object",
-  "properties": {
-    "x-material": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["concrete", "wood", "steel", "glass", "brick"]
-        },
-        "finish": {
-          "type": "string"
-        },
-        "color": {
-          "type": "string",
-          "pattern": "^#[0-9A-Fa-f]{6}$"
-        }
-      },
-      "required": ["type"]
-    }
-  }
-}
-```
-
-## Backward Compatibility
-
-When evolving extensions:
-
-1. **Don't remove properties**: Add new ones instead
-2. **Use version numbers**: Include version in extension data
-3. **Provide defaults**: Make new properties optional
-4. **Document changes**: Maintain a changelog
-
-```json
-{
-  "x-my-extension": {
-    "version": "2.0",
-    "legacy-support": true,
-    "new-feature": "value"
-  }
-}
-```
-
-## Extension Registry
-
-Consider maintaining a registry of common extensions:
-
-| Extension | Purpose | Maintainer | Schema |
-|-----------|---------|------------|--------|
-| `x-material` | Material properties | Community | [Link](#) |
-| `x-cost` | Cost estimation | Community | [Link](#) |
-| `x-mep` | MEP systems | Community | [Link](#) |
-| `x-bim` | BIM integration | Community | [Link](#) |
-
-## Best Practices
-
-!!! tip "Prefix Everything"
-    Always use the `x-` prefix for custom properties
-
-!!! tip "Namespace Vendors"
-    Use vendor names in extensions: `x-autodesk-*`, `x-mycompany-*`
-
-!!! tip "Document Extensions"
-    Provide clear documentation and examples for custom extensions
-
-!!! tip "Use Schemas"
-    Define JSON schemas for validation
-
-!!! warning "Don't Override"
-    Never override standard OAS properties with extensions
-
-## Validation
-
-Validate documents with extensions:
-
-```javascript
-function validateWithExtensions(document, schemas) {
-  // Validate base OAS
-  validateOAS(document);
-  
-  // Validate extensions
-  Object.keys(document).forEach(key => {
-    if (key.startsWith('x-')) {
-      const schema = schemas[key];
-      if (schema) {
-        validateAgainstSchema(document[key], schema);
-      }
-    }
-  });
-}
-```
-
-## Next Steps
-
-- Review [Core](core.md) for base concepts
-- See [Examples](examples/simple_plan.md) for extension usage
-- Check [Glossary](glossary.md) for extension terms
+Extensions empower OAS to support both simple layouts and highly complex architectural models.

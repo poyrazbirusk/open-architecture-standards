@@ -1,293 +1,172 @@
-# Glossary
+# OAS Glossary
 
-Definitions of terms used in the Open Architecture Standards (OAS).
+This glossary defines key terminology used across the Open Architecture Standards (OAS).  
+All definitions here apply consistently across OAS-Core, OAS-Geometry, OAS-Program, OAS-Layout, OAS-Render, and OAS-Extensions.
+
+---
 
 ## A
 
-**Adjacency**
-: The relationship between spaces that share a common boundary or are positioned next to each other.
+### **Adjacency**
+A design or layout relationship where two rooms or spaces share a boundary or must be positioned near each other. Defined in OAS-Program and realized in OAS-Layout.
 
-**Area**
-: The two-dimensional space enclosed by a room's boundaries, measured in square millimeters in OAS.
+### **Area (m²)**
+A derived value representing surface area in square meters. Allowed to contain decimals since it is not a geometric primitive.
 
-**Axis**
-: A reference line in the coordinate system, either horizontal (X-axis) or vertical (Y-axis).
+---
 
 ## B
 
-**Boundaries**
-: The array of coordinate points that define the perimeter of a room or space.
+### **Boundary Polygon**
+A closed polygon that defines the perimeter of a room or space. Must use integer millimeter coordinates. Defined in OAS-Geometry.
 
-**Building Code**
-: Regulations that specify minimum standards for construction, safety, and occupancy.
+---
 
 ## C
 
-**Cartesian Coordinate System**
-: A coordinate system that specifies each point using numerical coordinates based on its distance from perpendicular axes.
+### **Circulation**
+Movement paths between rooms, typically represented as a graph of connections. Defined in OAS-Layout and influenced by OAS-Program rules.
 
-**Circulation**
-: Spaces designated for movement and passage, such as hallways, corridors, and stairs.
+### **Closed Polygon**
+A polygon whose last point connects back to the first. Must be explicitly marked as `"closed": true`.
 
-**Coordinate**
-: A set of values that show an exact position in a coordinate system. In OAS, coordinates use X and Y values in millimeters.
+### **Core (OAS-Core)**
+The foundational module of OAS defining rooms, walls, openings, units, and metadata.
 
-**Core Concepts**
-: The fundamental elements and principles that form the foundation of OAS.
+---
 
 ## D
 
-**Door**
-: An opening type that provides access between spaces, typically with a hinged or sliding panel.
+### **Design Goal**
+A natural-language statement describing the desired outcome of a design (e.g., “compact 2-bedroom apartment with south-facing living room”). Part of OAS-Program.
 
-**Draw.io**
-: A diagramming tool that can be integrated with MkDocs for creating architectural diagrams.
+### **Door**
+An opening element connecting rooms. Represented in OAS-Layout as an opening placed along a wall.
+
+---
 
 ## E
 
-**Element**
-: A fundamental component of an OAS document, such as a room, wall, or opening.
+### **Extension**
+A modular add-on for OAS that introduces domain-specific entities such as furniture, MEP, 3D geometry, or materials. Defined in OAS-Extensions.
 
-**Extrusion**
-: The process of extending a 2D shape along a third axis to create a 3D form.
-
-**Extension**
-: Custom properties added to OAS elements using the `x-` prefix for domain-specific needs.
+---
 
 ## F
 
-**Floor Plan**
-: A 2D representation showing the layout of a building level from above.
+### **Footprint**
+A 2D polygon representing the physical outline of an object such as a piece of furniture. Often used in OAS-Furniture.
 
-**Furniture**
-: Movable objects within a space, which can be specified using extensions.
+---
 
 ## G
 
-**Geometry**
-: The mathematical description of shapes, sizes, positions, and spatial properties.
+### **Geometry (OAS-Geometry)**
+The OAS module defining coordinate systems, polygons, lines, units, and mm-based integer rules.
 
-**GLightbox**
-: A plugin that provides image zoom and gallery functionality in MkDocs.
+---
 
 ## H
 
-**Height**
-: Vertical measurement, typically referring to wall height, ceiling height, or opening height in millimeters.
+### **Hard Constraint**
+A mandatory rule in OAS-Program that must be satisfied in any generated layout.
+
+---
 
 ## I
 
-**Identifier (ID)**
-: A unique string that identifies an element within an OAS document.
+### **ID**
+A unique identifier for any entity (room, wall, opening, extension object). Must be stable across editing iterations.
 
-**ISO 8601**
-: International standard for date and time format (e.g., "2024-01-01T00:00:00Z").
-
-## J
-
-**JSON (JavaScript Object Notation)**
-: A lightweight data format used by OAS for representing architectural layouts.
+---
 
 ## L
 
-**Layout**
-: The top-level container object that holds all architectural elements in an OAS document.
+### **Layout (OAS-Layout)**
+The module representing the resolved geometric state of the design, including all room polygons, walls, openings, and circulation.
 
-**Line**
-: A straight geometric element defined by two points (start and end).
+### **LLM-Friendly**
+A design philosophy emphasizing simple JSON structures, predictable keys, and minimal nesting to support interactions with large language models.
 
-**LLM (Large Language Model)**
-: AI systems designed to understand and generate human language, which OAS is optimized to work with.
+---
 
 ## M
 
-**Material**
-: The substance from which building elements are constructed, such as concrete, wood, or steel.
+### **Metadata**
+Supplementary information attached to a document or entity, such as authoring tools, timestamps, or notes.
 
-**Material Theme**
-: The design system used for the MkDocs documentation, providing modern UI components.
-
-**MEP (Mechanical, Electrical, Plumbing)**
-: Building systems for heating, cooling, electrical power, lighting, and plumbing.
-
-**Metadata**
-: Data that provides information about other data, such as document title, author, and dates.
-
-**Millimeter (mm)**
-: The base unit of measurement in OAS, equal to 0.001 meters.
-
-**MkDocs**
-: A static site generator used to create the OAS documentation from Markdown files.
-
-## N
-
-**Navigation**
-: The structure and organization of documentation pages and their relationships.
+---
 
 ## O
 
-**OAS (Open Architecture Standards)**
-: The specification defined in this documentation for representing architectural layouts in JSON.
+### **Opening**
+A door, window, or other penetrations in a wall. OAS-Layout entities specifying width, height, and position along a wall.
 
-**Opening**
-: A gap in a wall for doors, windows, or passages.
+### **Origin**
+The coordinate (0,0) defining the reference point of the plan's local coordinate system.
 
-**Origin**
-: The point (0, 0) in a coordinate system from which all other points are measured.
+---
 
 ## P
 
-**Passage**
-: An opening type representing an unobstructed connection between spaces without a door.
+### **Plan ID**
+A unique identifier used to link OAS-Program, OAS-Layout, and OAS-Core documents together.
 
-**Point**
-: A location in space defined by X and Y coordinates.
+### **Polygon**
+A list of points defining a closed 2D shape. Must follow OAS-Geometry rules (integer mm coordinates, closed: true).
 
-**Polygon**
-: A closed shape formed by connecting multiple points with straight lines.
+### **Program (OAS-Program)**
+The intent-level module specifying desired Areas, Adjacencies, Constraints, and high-level goals.
 
-**Program**
-: The intended use or function of a space (e.g., "bedroom", "kitchen", "office").
-
-**Pymdown Extensions**
-: A collection of extensions for Python Markdown used in MkDocs for enhanced features.
+---
 
 ## R
 
-**Rendering**
-: The process of generating a visual representation from OAS data.
+### **Render (OAS-Render)**
+Guidelines describing how to convert OAS-Layout data into SVG, Canvas, WebGL, and other visual formats.
 
-**Room**
-: An enclosed space within a layout, defined by its boundaries and program.
+### **Room**
+A functional space defined by a boundary polygon. Core entity across OAS.
+
+---
 
 ## S
 
-**Schema**
-: The structure and rules that define how OAS documents should be formatted.
+### **Scale**
+The conversion factor from millimeters to pixels used in rendering.
 
-**Semantic Versioning**
-: A versioning system using MAJOR.MINOR.PATCH format (e.g., "1.0.0").
+### **Soft Constraint**
+A non-mandatory rule in OAS-Program that solvers or LLMs should attempt to satisfy but may override if needed.
 
-**SVG (Scalable Vector Graphics)**
-: An XML-based vector image format that can be rendered at any size without loss of quality.
+### **Structural Wall**
+A wall marked as load-bearing. Rendered differently in many implementations.
 
-**Syntax Highlighting**
-: Colored formatting of code to make it easier to read and understand.
+---
 
 ## T
 
-**Thickness**
-: The measurement of a wall's width, perpendicular to its length, in millimeters.
+### **Tag**
+A keyword applied to rooms or entities to categorize or filter them (e.g., “daylit”, “wet_area”).
 
-**Type**
-: A classification or category, such as opening type ("door", "window", "passage").
+---
 
 ## U
 
-**Units**
-: The measurement system used in a document. OAS defaults to millimeters (mm).
+### **Unit**
+Measurement units used in OAS. Geometry always uses `mm`, angles use `deg`, areas may use `mm2` or `m2`.
 
-## V
-
-**Validation**
-: The process of checking that an OAS document conforms to the specification rules.
-
-**Vendor Extension**
-: Custom properties specific to a particular tool or organization, using the `x-vendor-` prefix.
-
-**Version**
-: The specification version number an OAS document conforms to.
-
-**Viewport**
-: The visible area of a rendered layout, defined by position, zoom, and dimensions.
+---
 
 ## W
 
-**Wall**
-: A linear architectural element that defines boundaries and partitions, characterized by thickness, start point, and end point.
+### **Wall**
+A straight boundary element between two points, often with thickness, connecting rooms. Defined in OAS-Core and OAS-Layout.
 
-**Window**
-: An opening type that provides light and/or ventilation, typically with glass.
-
-**Winding Order**
-: The direction (clockwise or counter-clockwise) in which polygon vertices are ordered.
-
-## X
-
-**X-axis**
-: The horizontal axis in a Cartesian coordinate system.
-
-**X-prefix**
-: The required prefix for custom extension properties (e.g., `x-custom-property`).
-
-## Y
-
-**Y-axis**
-: The vertical axis in a Cartesian coordinate system.
-
-## Z
-
-**Zoom**
-: The scale factor for viewing a layout, where larger values show more detail.
+### **Window**
+An opening that provides daylight and ventilation, placed along a wall with attributes such as width, height, and sill height.
 
 ---
 
-## Acronyms
+## Summary
 
-| Acronym | Full Term |
-|---------|-----------|
-| 2D | Two-Dimensional |
-| 3D | Three-Dimensional |
-| ADA | Americans with Disabilities Act |
-| API | Application Programming Interface |
-| BIM | Building Information Modeling |
-| CAD | Computer-Aided Design |
-| HVAC | Heating, Ventilation, and Air Conditioning |
-| ID | Identifier |
-| JSON | JavaScript Object Notation |
-| LLM | Large Language Model |
-| MEP | Mechanical, Electrical, Plumbing |
-| mm | Millimeters |
-| OAS | Open Architecture Standards |
-| PDF | Portable Document Format |
-| PNG | Portable Network Graphics |
-| SVG | Scalable Vector Graphics |
-| UI | User Interface |
-| URL | Uniform Resource Locator |
-| XML | Extensible Markup Language |
-
----
-
-## Related Terms
-
-### From Architecture
-
-- **Floor Area Ratio (FAR)**: The ratio of total building floor area to the area of the lot
-- **Setback**: The minimum distance a building must be from property lines
-- **Zoning**: Land use regulations that control building types and uses
-
-### From Software
-
-- **API**: Application Programming Interface for software integration
-- **Parsing**: Analyzing and converting data from one format to another
-- **Serialization**: Converting data structures into a storable format
-
-### From Mathematics
-
-- **Vector**: A quantity having direction and magnitude
-- **Matrix**: A rectangular array of numbers used for transformations
-- **Algorithm**: A step-by-step procedure for calculations
-
----
-
-## See Also
-
-- [Core Concepts](core.md) - Fundamental OAS concepts
-- [Geometry](geometry.md) - Coordinate systems and shapes
-- [Program](program.md) - Room types and classifications
-- [Layout](layout.md) - Complete layout structures
-- [Extensions](extensions.md) - Custom properties
-
----
-
-*This glossary is maintained as part of the OAS specification. If you find terms that need clarification or addition, please contribute to the documentation.*
+This glossary standardizes terminology across all OAS modules, ensuring consistent understanding and interoperability between tools, LLMs, solvers, and renderers.

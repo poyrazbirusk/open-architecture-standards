@@ -1,421 +1,266 @@
-# Render
+# OAS-Render
 
-This page describes rendering and visualization concepts for OAS layouts.
+OAS-Render defines the **visualization guidelines** for converting OAS-Layout geometry into graphical output formats.  
+While OAS-Layout provides exact spatial data in millimeters, OAS-Render describes *how that data should be displayed* in:
 
-## Overview
+- **SVG**
+- **Canvas 2D**
+- **WebGL**
+- **PDF**
+- **Raster exports**
 
-While OAS is primarily a data format, understanding rendering concepts helps create layouts that visualize well. This page covers visualization strategies, styling, and rendering considerations.
+This module ensures that different tools render OAS plans with consistent visual meaning while allowing stylistic customization.
 
-## Rendering Concepts
+---
 
-### 2D Rendering
+## 1. Purpose of OAS-Render
 
-Most OAS layouts are rendered as 2D floor plans:
+The goals of OAS-Render are:
 
-- **Top-down view**: Birds-eye perspective
-- **Scale**: Typically 1:50 or 1:100 for floor plans
-- **Line weights**: Different thicknesses for walls, openings, etc.
-- **Colors**: Different colors for rooms by program type
+- Provide a standard mapping from abstract geometry to graphical primitives  
+- Ensure consistent interpretation across rendering engines  
+- Make architectural plans visually clear and readable  
+- Support real-time and static rendering pipelines  
+- Support styling via CSS or shader overrides  
 
-### Coordinate Mapping
+OAS-Render does **not** define aesthetics, but defines **defaults** and **mapping rules** that renderers must follow.
 
-Convert OAS coordinates to screen/canvas coordinates:
+---
 
-```javascript
-// Map millimeters to pixels
-function toPixels(mm, scale = 0.1) {
-  return mm * scale; // 0.1 = 1mm = 0.1px
-}
+## 2. Rendering Components Overview
 
-// Map OAS point to canvas
-function mapPoint(point, scale, offset) {
-  return {
-    x: point.x * scale + offset.x,
-    y: point.y * scale + offset.y
-  };
-}
+Rendering is based on OAS-Layout elements:
+
+| OAS Entity | Rendered As | Notes |
+|------------|-------------|-------|
+| Room | Polygon | Fill + border |
+| Wall | Line or thick line | Thickness in mm |
+| Opening (door/window) | Rect/line segment | Placement tied to wall |
+| Circulation | Paths/arrows | Optional layer |
+| Tags/IDs | Labels | Optional |
+
+The visual layers should align 1:1 with layout geometry.
+
+---
+
+## 3. Coordinate Mapping
+
+OAS uses integer millimeters. Renderers must convert mm to pixels using a **scale factor**.
+
+Example:
+
+```
+1 px = 2 mm  (for full-plan view)
+1 px = 1 mm  (for detail views)
 ```
 
-### Viewport
+Scaling must preserve aspect ratio and orientation:
 
-Define a viewport to control what's visible:
+- X → right  
+- Y → up (default architectural plan orientation)  
 
-```javascript
-const viewport = {
-  centerX: 5000,  // Center on X coordinate
-  centerY: 4000,  // Center on Y coordinate
-  zoom: 0.05,     // Zoom level (smaller = zoomed out)
-  width: 1200,    // Canvas width in pixels
-  height: 800     // Canvas height in pixels
-};
+If using screen coordinates (y → down), renderer must invert Y internally.
+
+---
+
+## 4. SVG Rendering Guidelines
+
+SVG is the recommended reference format due to:
+
+- infinite scalability  
+- human-readable structure  
+- layering through `<g>` groups  
+- CSS styling  
+
+### 4.1 SVG Group Structure
+
+Recommended grouping:
+
+```svg
+<g id="oas-rooms">...</g>
+<g id="oas-walls">...</g>
+<g id="oas-openings">...</g>
+<g id="oas-circulation">...</g>
+<g id="oas-labels">...</g>
 ```
 
-## Rendering Elements
+### 4.2 Rooms
+
+Render rooms as `<polygon>` elements.
+
+Attributes:
+
+- `fill` (default: none or light tint)
+- `stroke` (default: #000)
+- `stroke-width`
+
+Example:
+
+```svg
+<polygon points="0,0 5000,0 5000,3000 0,3000"
+         fill="#f8f8f8"
+         stroke="#000"
+         stroke-width="50"/>
+```
+
+### 4.3 Walls
+
+Walls can be rendered in two ways:
+
+1. **As lines with stroke-width = wall thickness**
+2. **As polygons** (for full accuracy)
+
+Example (simple):
+
+```svg
+<line x1="0" y1="0" x2="5000" y2="0" stroke="#000" stroke-width="200"/>
+```
+
+### 4.4 Openings
+
+Doors and windows should be placed relative to wall coordinates.
+
+Door example:
+
+```svg
+<rect x="1200" y="0" width="900" height="50" fill="#000"/>
+```
+
+Windows may use height offsets + sill height.
+
+---
+
+## 5. Canvas 2D Rendering Guidelines
+
+Canvas is suitable for interactive editors.
+
+### Key Rules:
+
+- Use mm → px scaling
+- Maintain OAS coordinate orientation
+- Render in layers (rooms → walls → openings → labels)
+
+Canvas example (in pseudocode):
+
+```
+ctx.beginPath()
+ctx.moveTo(x1, y1)
+ctx.lineTo(x2, y2)
+ctx.lineWidth = wall.thickness_mm * scale
+ctx.stroke()
+```
+
+### Labels
+
+Rooms should have labels (centered):
+
+```
+ctx.fillText(room.name, cx, cy)
+```
+
+---
+
+## 6. WebGL Rendering Guidelines
+
+WebGL is used for interactive and high-performance rendering.  
+OAS-Render provides guidelines for mapping geometric primitives to buffers:
+
+- Rooms → triangle meshes
+- Walls → extruded polygons
+- Openings → boolean cutouts or overlays
+
+### WebGL recommendations:
+
+- Keep coordinates in world units = millimeters  
+- Use shaders for styling  
+- Use transform matrices for zoom/pan  
+- Consider GPU instancing for large plans  
+
+---
+
+## 7. Default Visual Styling (Optional)
+
+Defaults are recommended but not enforced:
 
 ### Rooms
-
-Render room boundaries as filled polygons:
-
-```javascript
-function renderRoom(room, style) {
-  ctx.fillStyle = style.fill;
-  ctx.strokeStyle = style.stroke;
-  ctx.lineWidth = style.lineWidth;
-  
-  ctx.beginPath();
-  const first = room.boundaries[0];
-  ctx.moveTo(first.x, first.y);
-  
-  for (let i = 1; i < room.boundaries.length; i++) {
-    const point = room.boundaries[i];
-    ctx.lineTo(point.x, point.y);
-  }
-  ctx.closePath();
-  
-  ctx.fill();
-  ctx.stroke();
-}
-```
+- Fill: `#f8f8f8`
+- Border: `#333`
+- Border width: `50 mm`
 
 ### Walls
-
-Render walls as thick lines:
-
-```javascript
-function renderWall(wall) {
-  ctx.strokeStyle = '#000000';
-  ctx.lineWidth = wall.thickness * scale;
-  ctx.lineCap = 'square';
-  
-  ctx.beginPath();
-  ctx.moveTo(wall.start.x, wall.start.y);
-  ctx.lineTo(wall.end.x, wall.end.y);
-  ctx.stroke();
-}
-```
+- Color: `#000`
+- Thickness: from `thickness_mm`
 
 ### Openings
+- Doors: black or dark gray rectangles
+- Windows: blue or light gray
 
-Render openings with special symbols:
+### Labels
+- Font: sans-serif  
+- Size: proportional to room  
 
-```javascript
-function renderOpening(opening) {
-  const wall = findWall(opening.wall_id);
-  
-  if (opening.type === 'door') {
-    renderDoorSymbol(opening, wall);
-  } else if (opening.type === 'window') {
-    renderWindowSymbol(opening, wall);
-  } else if (opening.type === 'passage') {
-    renderPassageSymbol(opening, wall);
-  }
-}
-```
+Renderers may override styling through:
+- CSS
+- Theme files
+- Shader uniforms
 
-## Styling
+---
 
-### Color Schemes
+## 8. Layers and Z-Ordering
 
-Define color schemes for different program types:
+Recommended draw order:
 
-```javascript
-const programColors = {
-  'living': '#E3F2FD',      // Light blue
-  'bedroom': '#F3E5F5',     // Light purple
-  'kitchen': '#FFF3E0',     // Light orange
-  'bathroom': '#E0F2F1',    // Light teal
-  'office': '#F1F8E9',      // Light green
-  'meeting': '#FFF9C4',     // Light yellow
-  'storage': '#ECEFF1',     // Light gray
-  'circulation': '#FFFFFF'  // White
-};
-```
+1. Room fills  
+2. Room boundaries  
+3. Walls  
+4. Openings  
+5. Circulation  
+6. Labels  
+7. Annotations  
 
-### Line Styles
+This ensures clarity and prevents overlaps from hiding important elements.
 
-Different line styles for different elements:
+---
 
-```javascript
-const lineStyles = {
-  exteriorWall: {
-    color: '#000000',
-    width: 3,
-    style: 'solid'
-  },
-  interiorWall: {
-    color: '#666666',
-    width: 2,
-    style: 'solid'
-  },
-  partition: {
-    color: '#999999',
-    width: 1,
-    style: 'dashed'
-  }
-};
-```
+## 9. Interaction Support (Optional)
 
-### Annotations
+OAS-Render may provide optional interaction bindings:
 
-Add labels and dimensions:
+- Select room by clicking its polygon
+- Highlight walls on hover
+- Show opening metadata on click
+- Drag-to-move in editors
+- Tooltips for area values
 
-```javascript
-function renderLabel(room, position) {
-  ctx.font = '14px Arial';
-  ctx.fillStyle = '#333333';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  
-  ctx.fillText(room.name, position.x, position.y);
-  
-  // Add area below name
-  const area = calculateArea(room.boundaries);
-  const areaSqm = (area / 1000000).toFixed(1);
-  ctx.font = '12px Arial';
-  ctx.fillStyle = '#666666';
-  ctx.fillText(`${areaSqm} m²`, position.x, position.y + 20);
-}
-```
+These interactions rely on referencing the `id` fields from OAS-Layout.
 
-## SVG Rendering
+---
 
-Generate SVG output from OAS:
+## 10. Export Guidelines
 
-```javascript
-function generateSVG(layout) {
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">`;
-  
-  // Render rooms
-  layout.rooms.forEach(room => {
-    const points = room.boundaries
-      .map(p => `${p.x},${p.y}`)
-      .join(' ');
-    
-    const fill = programColors[room.program] || '#FFFFFF';
-    svg += `<polygon points="${points}" fill="${fill}" stroke="#000" stroke-width="2"/>`;
-    
-    // Add label
-    const center = calculateCenter(room.boundaries);
-    svg += `<text x="${center.x}" y="${center.y}" text-anchor="middle">${room.name}</text>`;
-  });
-  
-  // Render walls
-  layout.walls.forEach(wall => {
-    svg += `<line x1="${wall.start.x}" y1="${wall.start.y}" `;
-    svg += `x2="${wall.end.x}" y2="${wall.end.y}" `;
-    svg += `stroke="#000" stroke-width="${wall.thickness}"/>`;
-  });
-  
-  svg += '</svg>';
-  return svg;
-}
-```
+Renderers should support export to:
 
-## 3D Visualization
+- SVG (preferred)
+- PNG/JPEG (raster)
+- PDF (vector)
+- WebGL snapshots (canvas → image)
 
-For 3D rendering, extrude 2D layouts:
+All exports must preserve:
 
-```javascript
-function extrude3D(room, height = 2800) {
-  const geometry = new THREE.ExtrudeGeometry(
-    createShape(room.boundaries),
-    {
-      depth: height,
-      bevelEnabled: false
-    }
-  );
-  
-  const material = new THREE.MeshLambertMaterial({
-    color: programColors[room.program]
-  });
-  
-  return new THREE.Mesh(geometry, material);
-}
-```
+- scale  
+- line thickness  
+- text positions  
 
-## Interactive Features
+---
 
-### Zoom and Pan
+## 11. Summary
 
-Implement zoom and pan controls:
+OAS-Render defines:
 
-```javascript
-canvas.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-  viewport.zoom *= zoomFactor;
-  render();
-});
+- how to visualize millimeter-precise geometry  
+- consistent mappings from layout → graphics  
+- recommended groupings, layers, and styles  
+- SVG, Canvas, and WebGL conventions  
+- optional interactivity guidelines  
 
-let isDragging = false;
-let lastPos = {x: 0, y: 0};
-
-canvas.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  lastPos = {x: e.clientX, y: e.clientY};
-});
-
-canvas.addEventListener('mousemove', (e) => {
-  if (isDragging) {
-    const dx = e.clientX - lastPos.x;
-    const dy = e.clientY - lastPos.y;
-    viewport.centerX -= dx / viewport.zoom;
-    viewport.centerY -= dy / viewport.zoom;
-    lastPos = {x: e.clientX, y: e.clientY};
-    render();
-  }
-});
-```
-
-### Selection
-
-Implement element selection:
-
-```javascript
-canvas.addEventListener('click', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.clientX - rect.left - viewport.width/2) / viewport.zoom + viewport.centerX;
-  const y = (e.clientY - rect.top - viewport.height/2) / viewport.zoom + viewport.centerY;
-  
-  const selectedRoom = findRoomAtPoint(layout, {x, y});
-  if (selectedRoom) {
-    highlightRoom(selectedRoom);
-  }
-});
-```
-
-## Export Formats
-
-### PNG/JPEG
-
-Export as raster image:
-
-```javascript
-function exportPNG() {
-  const dataURL = canvas.toDataURL('image/png');
-  const link = document.createElement('a');
-  link.download = 'layout.png';
-  link.href = dataURL;
-  link.click();
-}
-```
-
-### SVG
-
-Export as vector graphic:
-
-```javascript
-function exportSVG() {
-  const svg = generateSVG(layout);
-  const blob = new Blob([svg], {type: 'image/svg+xml'});
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.download = 'layout.svg';
-  link.href = url;
-  link.click();
-}
-```
-
-### PDF
-
-Export as PDF document:
-
-```javascript
-function exportPDF() {
-  const doc = new jsPDF();
-  const svg = generateSVG(layout);
-  doc.svg(svg, {
-    x: 10,
-    y: 10,
-    width: 180,
-    height: 260
-  });
-  doc.save('layout.pdf');
-}
-```
-
-## Performance Optimization
-
-### Level of Detail
-
-Adjust detail based on zoom level:
-
-```javascript
-function shouldRenderDetail(element, zoom) {
-  if (zoom < 0.01) {
-    // Very zoomed out - only render major elements
-    return element.type === 'room';
-  } else if (zoom < 0.05) {
-    // Medium zoom - render rooms and walls
-    return element.type !== 'annotation';
-  } else {
-    // Zoomed in - render everything
-    return true;
-  }
-}
-```
-
-### Culling
-
-Skip rendering elements outside viewport:
-
-```javascript
-function isInViewport(element, viewport) {
-  const bounds = calculateBounds(element);
-  return !(
-    bounds.maxX < viewport.minX ||
-    bounds.minX > viewport.maxX ||
-    bounds.maxY < viewport.minY ||
-    bounds.minY > viewport.maxY
-  );
-}
-```
-
-### Caching
-
-Cache rendered elements:
-
-```javascript
-const renderCache = new Map();
-
-function renderWithCache(element) {
-  const key = `${element.id}-${viewport.zoom}`;
-  if (!renderCache.has(key)) {
-    const canvas = document.createElement('canvas');
-    // Render element to canvas
-    renderCache.set(key, canvas);
-  }
-  return renderCache.get(key);
-}
-```
-
-## Rendering Libraries
-
-Popular libraries for rendering OAS layouts:
-
-- **HTML Canvas**: Native browser API
-- **SVG**: Vector graphics in HTML
-- **Three.js**: 3D rendering with WebGL
-- **D3.js**: Data visualization and SVG
-- **Paper.js**: Vector graphics scripting
-- **Fabric.js**: Canvas library with interactivity
-
-## Best Practices
-
-!!! tip "Performance"
-    Use appropriate level of detail based on zoom level
-
-!!! tip "Accessibility"
-    Provide text alternatives for visual elements
-
-!!! tip "Responsiveness"
-    Make renderings responsive to different screen sizes
-
-!!! tip "Export"
-    Support multiple export formats for different use cases
-
-## Next Steps
-
-- Learn about [Extensions](extensions.md) for custom rendering properties
-- See [Examples](examples/simple_plan.md) for rendered layouts
-- Explore [Glossary](glossary.md) for rendering terms
+It ensures that any renderer can present an OAS layout consistently and clearly.

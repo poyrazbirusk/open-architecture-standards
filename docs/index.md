@@ -1,88 +1,61 @@
-# Open Architecture Standards
+# Open Architecture Standards (OAS)
 
-Welcome to the **Open Architecture Standards (OAS)** documentation!
+**Version:** 1.0.0  
+**Status:** Draft
 
-## What is OAS?
+Open Architecture Standards (OAS) defines an open, extensible, JSON-based
+representation for architectural layouts, programmatic intent, geometry,
+and semantic relationships. OAS is designed to be:
 
-Open Architecture Standards (OAS) is a lightweight, LLM-friendly schema for describing architectural layouts, programs, rooms, walls, and openings using simple JSON in millimeter coordinates. It's designed for:
+- **LLM-friendly**: simple, predictable, integer-based JSON
+- **Human-friendly**: readable and editable by architects and developers
+- **Renderer-friendly**: easy to visualize in SVG, Canvas, or WebGL
+- **Extensible**: additional modules can define furniture, MEP, 3D, site, etc.
 
-- 🤖 **Generative design** - Enable AI-powered architectural design
-- ✏️ **Editing by prompts** - Modify designs using natural language
-- 🌐 **Easy rendering** - Simple integration with web tools
+All coordinates are expressed in **millimeters** using **integer** values
+for precision and simplicity.
 
-## Key Features
+---
 
-- **Simple JSON Format**: Easy to read, write, and parse
-- **Millimeter Precision**: Accurate coordinate-based descriptions
-- **LLM-Friendly**: Designed for seamless AI integration
-- **Web-Ready**: Built for modern web rendering tools
+## Structure of OAS
 
-## Quick Start
+OAS is divided into several core modules:
 
-Get started with OAS by exploring our documentation:
+- **OAS-Core** — metadata, units, rooms, walls, openings  
+- **OAS-Geometry** — polygon, line, and numeric conventions  
+- **OAS-Program** — high-level intent (areas, adjacency, constraints)  
+- **OAS-Layout** — fully resolved geometry  
+- **OAS-Render** — mapping OAS to visualization formats  
+- **OAS-Extensions** — optional modules (furniture, MEP, 3D)
 
-1. **[Core Concepts](core.md)** - Understand the fundamentals
-2. **[Geometry](geometry.md)** - Learn about coordinates and shapes
-3. **[Program](program.md)** - Define room types and usage
-4. **[Layout](layout.md)** - Create complete architectural designs
+---
 
-## Specification
-
-- **[Core](core.md)** - Base concepts and data structures
-- **[Geometry](geometry.md)** - Coordinate systems and geometric elements
-- **[Program](program.md)** - Room classifications and programs
-- **[Layout](layout.md)** - Complete layout definitions
-- **[Render](render.md)** - Visualization and rendering
-- **[Extensions](extensions.md)** - Custom properties and extensions
-- **[Glossary](glossary.md)** - Terminology and definitions
-
-## Examples
-
-Learn by example:
-
-- **[Simple Plan](examples/simple_plan.md)** - Basic single-room layout
-- **[Multi-Room Plan](examples/multi_room_plan.md)** - Complex apartment layout
-
-## Use Cases
-
-OAS is perfect for:
-
-- **Architectural Design Tools**: Build AI-powered design applications
-- **Space Planning**: Automate layout generation and optimization
-- **Visualization**: Create interactive floor plans and 3D models
-- **Documentation**: Standardize architectural data representation
-
-## Example
-
-Here's a minimal OAS document:
+## Quick Example (OAS-Core)
 
 ```json
 {
-  "version": "1.0.0",
-  "layout": {
-    "id": "simple-room",
-    "name": "Office",
-    "rooms": [
-      {
-        "id": "room-1",
-        "name": "Office",
-        "program": "office",
-        "boundaries": [
-          {"x": 0, "y": 0},
-          {"x": 4000, "y": 0},
-          {"x": 4000, "y": 3000},
-          {"x": 0, "y": 3000}
+  "oas": "1.0.0",
+  "plan_id": "simple_plan_01",
+  "title": "Simple Layout",
+  "units": { "length": "mm", "angle": "deg" },
+
+  "rooms": [
+    {
+      "id": "room_living_01",
+      "name": "Living Room",
+      "usage": "living",
+      "boundary_polygon": {
+        "unit": "mm",
+        "closed": true,
+        "points": [
+          { "x": 0, "y": 0 },
+          { "x": 5000, "y": 0 },
+          { "x": 5000, "y": 3000 },
+          { "x": 0, "y": 3000 }
         ]
-      }
-    ]
-  }
+      },
+      "area_m2": 15.0
+    }
+  ]
 }
 ```
-
-## Contributing
-
-This is an open standard. Contributions and feedback are welcome! Visit our [GitHub repository](https://github.com/poyrazbirusk/open-architecture-standards) to get involved.
-
-## Version
-
-Current specification version: **1.0.0**

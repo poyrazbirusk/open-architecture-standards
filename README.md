@@ -57,6 +57,16 @@ The documentation supports Draw.io diagrams via the `mkdocs-drawio-exporter` plu
 
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
 
+## Development with Dev Container
+
+You can use VS Code Dev Containers for a consistent development environment.
+
+- **Open in Container**: In VS Code, run the command "Remote-Containers: Open Folder in Container..." and select the repository root.
+- **What it does**: Installs Python, runs `pip install -r requirements.txt` (configured in the devcontainer), and recommends useful extensions.
+- **Run docs server**: Inside the container, serve the docs with `mkdocs serve` and open http://127.0.0.1:8000.
+
+If you don't use dev containers, the `.vscode/extensions.json` recommends helpful extensions.
+
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.

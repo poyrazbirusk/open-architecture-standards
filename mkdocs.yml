@@ -22,14 +22,14 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-      primary: teal
-      accent: cyan
+      primary: '#0b3d91'
+      accent: '#0f69ff'
     - scheme: slate
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-      primary: teal
-      accent: cyan
+      primary: '#0b3d91'
+      accent: '#0f69ff'
 
 plugins:
   - search
@@ -87,3 +87,6 @@ nav:
   - Examples:
     - Simple Plan: examples/simple_plan.md
     - Multi-Room Plan: examples/multi_room_plan.md
+
+extra_css:
+  - 'assets/overrides.css'

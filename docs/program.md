@@ -1,270 +1,240 @@
-# Program
+# OAS-Program
 
-This page describes how to specify room programs and usage types in OAS.
+OAS-Program defines the **high-level design intent layer** of the Open Architecture Standards.  
+While OAS-Core and OAS-Geometry describe *what exists* in a plan, OAS-Program describes *what the plan should achieve*.
 
-## Overview
+This module is typically used by:
+- LLMs generating architectural layouts from natural-language prompts
+- Automated layout solvers
+- User-facing design tools
+- Constraint validation systems
 
-The **program** of a space defines its intended use, function, or room type. This information is essential for:
+OAS-Program allows a design to be expressed in conceptual terms—areas, adjacencies, requirements—without committing to specific geometry.
 
-- Automated layout generation
-- Space planning and optimization
-- Building code compliance
-- Functional analysis
-- Rendering and visualization
+---
 
-## Program Property
+## 1. Purpose of OAS-Program
 
-Rooms in OAS can include a `program` property to specify their function:
+The goals of OAS-Program are:
 
-```json
-{
-  "id": "room-1",
-  "name": "Master Bedroom",
-  "program": "bedroom",
-  "boundaries": [...]
-}
-```
+1. Represent desired spatial functions  
+2. Describe functional relationships between spaces  
+3. Encode design constraints  
+4. Provide a stable input format for layout generation  
+5. Support iterative editing of design intent  
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `program` | string | No | Room function or type |
+It answers questions like:
 
-## Standard Programs
+- *How big should the living room be?*  
+- *Which rooms require daylight?*  
+- *Which spaces must be adjacent?*  
+- *What are the circulation requirements?*  
+- *What are the user’s goals for the design?*
 
-While OAS allows any string value for `program`, these standard programs are recommended for consistency:
+---
 
-### Residential Programs
+## 2. Structure of an OAS-Program Document
 
-| Program | Description | Typical Size Range |
-|---------|-------------|-------------------|
-| `living` | Living room, family room | 15-40 m² |
-| `bedroom` | Bedroom, sleeping quarters | 9-20 m² |
-| `kitchen` | Kitchen, cooking area | 8-20 m² |
-| `dining` | Dining room | 10-20 m² |
-| `bathroom` | Full bathroom | 4-8 m² |
-| `powder-room` | Half bath, toilet room | 2-4 m² |
-| `laundry` | Laundry room | 3-6 m² |
-| `storage` | Storage, closet | 2-10 m² |
-| `garage` | Garage, parking | 12-40 m² |
-| `entry` | Entry, foyer | 4-10 m² |
-| `hallway` | Corridor, circulation | 2-8 m² |
-| `utility` | Utility room, mechanical | 3-8 m² |
+A typical OAS-Program document contains:
 
-### Commercial Programs
+- **program metadata**
+- **design goals**
+- **room requirements**
+- **adjacency constraints**
+- **circulation rules**
+- **global constraints**
+- **notes & reasoning (optional)**
 
-| Program | Description | Typical Size Range |
-|---------|-------------|-------------------|
-| `office` | Private office | 9-20 m² |
-| `open-office` | Open workspace | 100-500 m² |
-| `meeting` | Meeting room, conference | 10-40 m² |
-| `reception` | Reception area, lobby | 15-50 m² |
-| `breakroom` | Break room, kitchen | 10-25 m² |
-| `restroom` | Public restroom | 8-20 m² |
-| `server-room` | Server room, data center | 10-40 m² |
-| `storage` | Storage, supplies | 5-30 m² |
-
-### Public Programs
-
-| Program | Description | Typical Size Range |
-|---------|-------------|-------------------|
-| `retail` | Retail space | 50-500 m² |
-| `restaurant` | Restaurant, café | 100-400 m² |
-| `classroom` | Classroom, training room | 40-80 m² |
-| `auditorium` | Auditorium, theater | 200-1000 m² |
-| `library` | Library, reading room | 100-500 m² |
-| `gym` | Gymnasium, fitness | 200-800 m² |
-
-### Service Programs
-
-| Program | Description | Typical Size Range |
-|---------|-------------|-------------------|
-| `mechanical` | Mechanical room, HVAC | 10-50 m² |
-| `electrical` | Electrical room | 5-20 m² |
-| `janitor` | Janitor closet | 2-5 m² |
-| `circulation` | Circulation, corridor | Varies |
-| `stairs` | Stairwell | 8-15 m² |
-| `elevator` | Elevator shaft | 4-8 m² |
-
-## Program Examples
-
-### Residential Unit
+### Example Structure
 
 ```json
 {
-  "rooms": [
-    {
-      "id": "living-room",
-      "name": "Living Room",
-      "program": "living",
-      "boundaries": [...]
-    },
-    {
-      "id": "master-bedroom",
-      "name": "Master Bedroom",
-      "program": "bedroom",
-      "boundaries": [...]
-    },
-    {
-      "id": "kitchen",
-      "name": "Kitchen",
-      "program": "kitchen",
-      "boundaries": [...]
-    }
-  ]
-}
-```
-
-### Office Suite
-
-```json
-{
-  "rooms": [
-    {
-      "id": "reception",
-      "name": "Reception Area",
-      "program": "reception",
-      "boundaries": [...]
-    },
-    {
-      "id": "conference",
-      "name": "Conference Room",
-      "program": "meeting",
-      "boundaries": [...]
-    },
-    {
-      "id": "office-1",
-      "name": "Private Office",
-      "program": "office",
-      "boundaries": [...]
-    }
-  ]
-}
-```
-
-## Custom Programs
-
-You can define custom programs for specialized uses:
-
-```json
-{
-  "id": "recording-studio",
-  "name": "Recording Studio",
-  "program": "recording-studio",
-  "boundaries": [...]
-}
-```
-
-For custom programs, consider using descriptive kebab-case names:
-- `maker-space`
-- `meditation-room`
-- `art-studio`
-- `home-theater`
-
-## Program Metadata
-
-You can add additional program-related metadata using custom properties:
-
-```json
-{
-  "id": "bedroom-1",
-  "name": "Bedroom 1",
-  "program": "bedroom",
-  "x-occupancy": 2,
-  "x-furnishing": "king-bed",
-  "x-requirements": {
-    "window": true,
-    "closet": true,
-    "ensuite": false
+  "oas_program": "1.0.0",
+  "plan_id": "apt_01",
+  "design_goal": "Two-bedroom apartment with a south-facing living area.",
+  "global_constraints": {
+    "target_area_m2": 75,
+    "max_area_m2": 85
   },
-  "boundaries": [...]
-}
-```
-
-## Program Hierarchies
-
-For complex buildings, programs can be organized hierarchically:
-
-```json
-{
-  "id": "suite-100",
-  "name": "Suite 100",
-  "program": "residential-unit",
-  "x-sub-programs": [
-    "living",
-    "bedroom",
-    "bedroom",
-    "bathroom",
-    "kitchen"
-  ],
-  "boundaries": [...]
-}
-```
-
-## Adjacency Requirements
-
-Program information is useful for defining adjacency requirements:
-
-```json
-{
-  "x-adjacency-matrix": {
-    "kitchen": {
-      "dining": "required",
-      "living": "preferred",
-      "bedroom": "avoid"
-    },
-    "bathroom": {
-      "bedroom": "preferred",
-      "kitchen": "avoid"
+  "rooms": [
+    {
+      "id": "living_kitchen",
+      "usage": "living_kitchen",
+      "desired_area_m2": { "min": 25, "max": 35 },
+      "must_have": ["daylight", "balcony_access"],
+      "adjacency": {
+        "must_touch": ["entry"],
+        "nice_to_touch": ["bedroom_1"]
+      }
     }
+  ]
+}
+```
+
+---
+
+## 3. Program Metadata
+
+Fields:
+
+- **oas_program** — fixed version string  
+- **plan_id** — links program → layout  
+- **title** (optional)  
+- **description** (optional)  
+
+Metadata should be stable throughout the design lifecycle.
+
+---
+
+## 4. Design Goals
+
+A natural-language sentence describing the intent of the project.
+
+Example:
+
+```
+“A compact 2-bedroom layout optimized for daylight and cross-ventilation.”
+```
+
+This field helps LLMs maintain context.
+
+---
+
+## 5. Global Constraints
+
+Global constraints describe project-wide requirements.
+
+Common fields:
+
+- **target_area_m2**
+- **max_area_m2**
+- **min_area_m2**
+- **orientation_preference** (e.g., "living spaces south")
+- **climate** ("temperate", "hot-dry", etc.)
+- **accessibility_level** ("basic", "universal")
+
+Example:
+
+```json
+{
+  "target_area_m2": 80,
+  "orientation_preference": "living rooms facing south"
+}
+```
+
+---
+
+## 6. Room Requirements
+
+Each room has a block describing its intended purpose and constraints.
+
+### Fields
+
+- **id** — stable identifier  
+- **usage** — functional category (bedroom, kitchen, circulation, etc.)  
+- **desired_area_m2** — min/max or exact  
+- **must_have** — boolean features  
+- **should_have** — softer requirements  
+- **adjacency** — spatial relationships  
+- **avoid** — things this room shouldn't touch  
+
+### Example
+
+```json
+{
+  "id": "bedroom_1",
+  "usage": "bedroom",
+  "desired_area_m2": { "min": 10, "max": 14 },
+  "must_have": ["daylight"],
+  "adjacency": {
+    "must_touch": ["corridor"],
+    "avoid_touch": ["living_kitchen"]
   }
 }
 ```
 
-## Program Validation
+---
 
-When validating programs, check for:
+## 7. Adjacency Rules
 
-1. **Required programs**: Ensure all necessary room types are present
-2. **Minimum counts**: Verify minimum number of each program type
-3. **Area requirements**: Validate room sizes meet program requirements
-4. **Code compliance**: Check against building code requirements
+Adjacency rules describe spatial relationships qualitatively.
 
-## Use Cases
+### Relationship Types
 
-### Generative Design
+- **must_touch** — direct physical adjacency required  
+- **should_touch** — recommended  
+- **avoid_touch** — should not share a boundary  
+- **must_connect_via** — defines circulation paths  
 
-Programs guide AI-powered layout generation:
-- Room placement based on adjacency preferences
-- Size allocation based on program requirements
-- Circulation planning based on program relationships
+Example:
 
-### Space Planning
+```json
+"adjacency": {
+  "must_touch": ["bathroom"],
+  "avoid_touch": ["kitchen"]
+}
+```
 
-Programs enable automated space planning:
-- Area calculation by program type
-- Program distribution analysis
-- Functional zoning
+---
 
-### Visualization
+## 8. Circulation Rules
 
-Programs control rendering:
-- Color coding by program type
-- Material selection
-- Furniture placement
+Defines how rooms should connect through paths.
 
-## Best Practices
+Common rules:
 
-!!! tip "Consistency"
-    Use standard program names consistently throughout your documents
+- `"entry"` must connect to all living spaces  
+- Bedrooms must be reachable without passing through other bedrooms  
+- Bathrooms must be accessible from shared spaces  
 
-!!! tip "Documentation"
-    Document any custom programs you define in your organization
+Example:
 
-!!! tip "Validation"
-    Create validation rules based on program requirements
+```json
+{
+  "circulation": {
+    "primary_entry": "entry",
+    "rules": [
+      "All rooms must connect to entry with at most 3 steps.",
+      "Bathroom must be reachable without crossing a bedroom."
+    ]
+  }
+}
+```
 
-## Next Steps
+---
 
-- Learn about [Layout](layout.md) to combine programs with geometry
-- See [Core](core.md) for base concepts
-- Explore [Examples](examples/multi_room_plan.md) for program usage
+## 9. Constraint Strength
+
+Requirements can be categorized:
+
+- **hard constraints** — must be satisfied
+- **soft constraints** — solver/LLM can trade off
+- **preferences** — ideal but not necessary
+
+This allows high-quality generative design.
+
+---
+
+## 10. Notes and Reasoning (LLM-friendly)
+
+OAS-Program allows an optional `rationale` field:
+
+```json
+"rationale": "Bedroom 1 should touch the corridor for privacy."
+```
+
+This helps LLMs maintain context across revisions.
+
+---
+
+## 11. Summary
+
+OAS-Program provides:
+
+- a structured, machine-readable way to describe design intent  
+- flexible room-level and global constraints  
+- adjacency and circulation rules  
+- LLM- and solver-friendly formatting  
+- stable IDs for iterative editing  
+
+It is the **starting point** for generating OAS-Layout geometries.

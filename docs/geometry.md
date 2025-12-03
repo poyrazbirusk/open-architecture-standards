@@ -1,269 +1,321 @@
-# Geometry
+# OAS-Geometry
 
-This page describes the geometric elements and coordinate system used in OAS.
+OAS-Geometry defines the **geometric rules, data structures, and numerical conventions** used throughout all Open Architecture Standards (OAS) modules.  
+These requirements ensure that all spatial data is precise, consistent, and easy to process by humans, LLMs, solvers, and renderers.
 
-## Coordinate System
+Geometry in OAS is strictly **2D**, integer-based, and expressed in **millimeters** to avoid floating-point ambiguity and maintain architectural accuracy.
 
-OAS uses a 2D Cartesian coordinate system with millimeter precision.
+---
 
-### Origin Point
+## 1. Coordinate System
 
-The origin (0, 0) represents a reference point in the layout, typically:
+All OAS geometry uses a unified 2D Cartesian coordinate space:
 
-- Bottom-left corner of the building
-- Center point of the site
-- A defined reference point in the architectural plans
+- **X axis → right**
+- **Y axis → up**
+- **Units: millimeters (`mm`)**
+- **Type: integer values only**
+- **Origin `(0,0)`** is arbitrary but must remain consistent within the plan
 
-### Axes
+### Example
 
-- **X-axis**: Horizontal direction (typically West to East)
-- **Y-axis**: Vertical direction (typically South to North)
-- **Units**: Millimeters (mm)
+```json
+{ "x": 2400, "y": 900 }
+```
+
+This represents the point *(2400 mm, 900 mm)*.
+
+### 1.1 Plan-local Coordinates
+
+OAS does **not** define a global geographic coordinate system.  
+Coordinates are **local to the plan**.
+
+Extensions such as **OAS-Site** may define global transforms (e.g., geospatial mapping).
+
+---
+
+## 2. Numerical Conventions
+
+### 2.1 Integer-only Geometry
+
+All *geometric* values must be integers representing millimeters:
+
+- Room polygon coordinates  
+- Wall endpoints  
+- Wall thickness  
+- Door/window widths & heights  
+- Distances and offsets  
+- Opening positions along walls  
+
+### Valid
+
+```json
+{ "x": 5000, "y": 3000 }
+"width_mm": 900
+```
+
+### Invalid
+
+```json
+{ "x": 5.0, "y": 3.2 }
+"width_mm": 900.5
+```
+
+---
+
+### 2.2 Derived Decimal Values
+
+Decimals are allowed only for **derived** or **non-geometric** values, such as:
+
+- Areas in m² (`area_m2`)
+- Percentages
+- Angles (optional decimal)
+
+Example:
+
+```json
+"area_m2": 15.75
+```
+
+### 2.3 Unit Summary
+
+| Concept | Unit | Type |
+|--------|------|-------|
+| Length | `mm` | integer (required) |
+| Angle | `deg` | integer or decimal |
+| Area (raw) | `mm2` | integer |
+| Area (display) | `m2` | decimal allowed |
+
+---
+
+## 3. Points
+
+A point is defined as:
+
+```json
+{ "x": 0, "y": 3000 }
+```
+
+### Point Rules
+
+- Both `x` and `y` must be present  
+- Both must be integers  
+- Values represent millimeters  
+- Only 2D points allowed in OAS-Geometry  
+
+---
+
+## 4. Line Segments
+
+Walls and other linear elements use a standard line segment:
+
+```json
+{
+  "from": { "x": 0, "y": 0 },
+  "to":   { "x": 5000, "y": 0 },
+  "unit": "mm"
+}
+```
+
+### Line Rules
+
+- Both endpoints must be valid OAS points  
+- `unit` must always be `"mm"`  
+- Lines should not self-intersect  
+- Lines used for walls should align with associated room boundaries  
+
+---
+
+## 5. Polygons
+
+Rooms and other closed shapes are defined using polygons.
 
 ### Example
 
 ```json
 {
-  "x": 0,
-  "y": 0
-}
-```
-
-This represents a point at the origin.
-
-## Points
-
-A point is the fundamental geometric element, represented by X and Y coordinates.
-
-### Point Object
-
-```json
-{
-  "x": 5000,
-  "y": 3000
-}
-```
-
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `x` | number | Yes | X-coordinate in millimeters |
-| `y` | number | Yes | Y-coordinate in millimeters |
-
-### Example Points
-
-```json
-// Origin point
-{"x": 0, "y": 0}
-
-// Point 5 meters east, 3 meters north
-{"x": 5000, "y": 3000}
-
-// Negative coordinates (west or south of origin)
-{"x": -2000, "y": -1000}
-```
-
-## Lines
-
-A line is defined by two points: start and end.
-
-### Line Definition
-
-```json
-{
-  "start": {"x": 0, "y": 0},
-  "end": {"x": 5000, "y": 0}
-}
-```
-
-This represents a horizontal line 5 meters long.
-
-## Polygons
-
-Polygons are defined by an array of points that form a closed shape.
-
-### Polygon Definition
-
-```json
-{
-  "boundaries": [
-    {"x": 0, "y": 0},
-    {"x": 5000, "y": 0},
-    {"x": 5000, "y": 4000},
-    {"x": 0, "y": 4000}
+  "unit": "mm",
+  "closed": true,
+  "points": [
+    { "x": 0, "y": 0 },
+    { "x": 5000, "y": 0 },
+    { "x": 5000, "y": 3000 },
+    { "x": 0, "y": 3000 }
   ]
 }
 ```
 
-This represents a rectangle with:
-- Width: 5000mm (5 meters)
-- Height: 4000mm (4 meters)
+### Polygon Rules
 
-### Winding Order
+- Must have **at least three points**
+- Must use integer-mm coordinates
+- Must explicitly set `closed: true`
+- Points must follow a consistent order (CW or CCW)
+- Self-intersecting polygons are not valid
 
-Polygons should follow a consistent winding order:
+---
 
-- **Counter-clockwise**: Exterior boundaries
-- **Clockwise**: Interior boundaries (holes)
+## 6. Curves and Complex Shapes
 
-### Valid Polygons
+OAS-Geometry supports curved shapes through specific primitives and properties. These allow for the definition of circles, arcs, rounded corners, and spirals while maintaining the integer-mm coordinate system.
 
-A valid polygon must:
+### 6.1 Circles
 
-1. Have at least 3 points
-2. Not self-intersect
-3. Have the last point implicitly connecting to the first
-
-## Shapes
-
-Common architectural shapes can be represented using polygons.
-
-### Rectangle
+Defined by a center point and a radius.
 
 ```json
 {
-  "boundaries": [
-    {"x": 0, "y": 0},
-    {"x": 6000, "y": 0},
-    {"x": 6000, "y": 4000},
-    {"x": 0, "y": 4000}
+  "type": "circle",
+  "center": { "x": 1000, "y": 2000 },
+  "radius_mm": 500
+}
+```
+
+### 6.2 Arcs
+
+Defined by a center, radius, and start/end angles.
+
+```json
+{
+  "type": "arc",
+  "center": { "x": 1000, "y": 2000 },
+  "radius_mm": 500,
+  "start_angle_deg": 0,
+  "end_angle_deg": 90
+}
+```
+
+*   **Direction**: Always counter-clockwise from start to end.
+
+### 6.3 Rounded Corners (Fillets)
+
+Polygons support an optional `fillet_radius_mm` property on each point. This creates a rounded corner at that vertex.
+
+```json
+{
+  "unit": "mm",
+  "closed": true,
+  "points": [
+    { "x": 0, "y": 0, "fillet_radius_mm": 0 },
+    { "x": 5000, "y": 0, "fillet_radius_mm": 500 },
+    { "x": 5000, "y": 3000, "fillet_radius_mm": 0 },
+    { "x": 0, "y": 3000, "fillet_radius_mm": 0 }
   ]
 }
 ```
 
-### L-Shape
+*   **Rule**: The fillet radius must be small enough to fit within the adjacent segments.
+
+### 6.4 Spirals
+
+Defined for use cases like spiral staircases.
 
 ```json
 {
-  "boundaries": [
-    {"x": 0, "y": 0},
-    {"x": 6000, "y": 0},
-    {"x": 6000, "y": 3000},
-    {"x": 3000, "y": 3000},
-    {"x": 3000, "y": 5000},
-    {"x": 0, "y": 5000}
-  ]
+  "type": "spiral",
+  "center": { "x": 0, "y": 0 },
+  "start_radius_mm": 200,
+  "end_radius_mm": 1500,
+  "start_angle_deg": 0,
+  "end_angle_deg": 360,
+  "clockwise": false
 }
 ```
 
-### Irregular Shape
+---
+
+## 7. Dimensional Fields
+
+OAS supports **two formats** for dimensions.
+
+### 7.1 Object Format
 
 ```json
 {
-  "boundaries": [
-    {"x": 0, "y": 0},
-    {"x": 4000, "y": 500},
-    {"x": 5000, "y": 3000},
-    {"x": 3000, "y": 4000},
-    {"x": 0, "y": 3500}
-  ]
+  "value": 200,
+  "unit": "mm"
 }
 ```
 
-## Dimensions
-
-Elements can specify explicit dimensions:
-
-### Thickness
-
-Used for walls and other linear elements:
+### 7.2 Short Format (preferred)
 
 ```json
-{
-  "thickness": 200  // 200mm thick wall
-}
+"thickness_mm": 200
+"width_mm": 900
+"height_mm": 2100
 ```
 
-### Width and Height
+### Rules
 
-Used for openings (doors, windows):
+- Values must always represent millimeters  
+- No decimals allowed  
+- Short format is recommended for common fields  
+
+---
+
+## 8. Angle Fields
+
+Angles are always expressed in degrees.
 
 ```json
-{
-  "width": 900,   // 900mm wide door
-  "height": 2100  // 2100mm high door
-}
+{ "angle_deg": 90 }
 ```
 
-### Area
+### Rules
 
-Can be specified or calculated for rooms:
+- Integers preferred, decimals allowed  
+- Must explicitly specify `"deg"`  
+- Radians are not allowed  
+- Positive rotation is **counterclockwise**  
+
+---
+
+## 9. Derived Values
+
+Derived values may use alternative units.
+
+### 9.1 Areas
 
 ```json
-{
-  "area": 20000000  // 20 square meters in square millimeters
-}
+"area_mm2": 15000000
 ```
 
-## Transformations
-
-While not explicitly part of the base specification, geometric transformations can be applied:
-
-### Translation
-
-Moving an element by an offset:
-
-```
-new_x = x + offset_x
-new_y = y + offset_y
-```
-
-### Rotation
-
-Rotating around a point (typically the origin):
-
-```
-new_x = x * cos(θ) - y * sin(θ)
-new_y = x * sin(θ) + y * cos(θ)
-```
-
-### Scaling
-
-Scaling from a reference point:
-
-```
-new_x = reference_x + (x - reference_x) * scale
-new_y = reference_y + (y - reference_y) * scale
-```
-
-## Precision
-
-All coordinates should maintain millimeter precision:
-
-- Integer values for whole millimeters
-- Floating-point values for sub-millimeter precision when needed
+or
 
 ```json
-// Integer precision
-{"x": 5000, "y": 3000}
-
-// Sub-millimeter precision
-{"x": 5000.5, "y": 3000.25}
+"area_m2": 15.0
 ```
 
-## Geometric Calculations
+### 9.2 Unit Conversion Rules
 
-### Distance Between Points
+- 1 m = 1000 mm  
+- 1 cm = 10 mm  
+- 1 m² = 1,000,000 mm²  
 
-```
-distance = sqrt((x2 - x1)² + (y2 - y1)²)
-```
+All conversions must remain exact.
 
-### Polygon Area
+---
 
-For a polygon with vertices (x₁, y₁), (x₂, y₂), ..., (xₙ, yₙ):
+## 10. Precision Requirements
 
-```
-area = 0.5 * |Σ(xᵢ * yᵢ₊₁ - xᵢ₊₁ * yᵢ)|
-```
+With mm-integer geometry:
 
-### Line Length
+- No floating-point rounding drift  
+- Perfect reproducibility across tools  
+- Reliable snapping to grids (e.g. 100 mm, 300 mm)  
+- Predictable LLM manipulation  
+- Cleaner diffs and patches  
 
-```
-length = sqrt((end.x - start.x)² + (end.y - start.y)²)
-```
+---
 
-## Next Steps
+## 11. Summary
 
-- Understand [Program](program.md) for room classifications
-- Learn about [Layout](layout.md) for complete designs
-- See [Examples](examples/simple_plan.md) for practical geometry usage
+OAS-Geometry establishes the strict numerical and geometric rules that make OAS:
+
+- precise
+- consistent
+- predictable
+- LLM-safe
+- renderer-friendly
+
+These conventions form the **mathematical foundation** of the entire Open Architecture Standards ecosystem.
