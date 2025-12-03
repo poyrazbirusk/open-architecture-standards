@@ -170,6 +170,35 @@ Plan dimensions are simple rectangles connected by doors, all placed in mm coord
     }
   ],
 
+  "openings_examples": [
+    {
+      "id": "window_living_north",
+      "opening_type": "window",
+      "is_fixed": false,
+      "operation": "sliding",
+      "slide_direction": "left-to-right",
+      "slider_width_mm": 600,
+      "in_wall": "wall_living_north",
+      "position_along_wall_mm": 1500,
+      "width_mm": 1200,
+      "height_mm": 1200,
+      "sill_height_mm": 900
+    },
+    {
+      "id": "door_pantry",
+      "opening_type": "door",
+      "is_fixed": false,
+      "operation": "swing",
+      "swing_direction": "outward",
+      "hinge_side": "right",
+      "hinge_offset_mm": 80,
+      "in_wall": "wall_kitchen_pantry",
+      "position_along_wall_mm": 300,
+      "width_mm": 700,
+      "height_mm": 2100
+    }
+  ],
+
   "connections": [
     { "from": "entry",          "to": "living_kitchen", "type": "direct" },
     { "from": "entry",          "to": "bedroom_01",     "type": "direct" },

@@ -165,6 +165,36 @@ A straight boundary element between two points, often with thickness, connecting
 ### **Window**
 An opening that provides daylight and ventilation, placed along a wall with attributes such as width, height, and sill height.
 
+### **is_fixed**
+
+Boolean flag indicating whether an opening is non-operable (true) or operable (false).
+
+### **operation**
+
+Describes how an opening operates. Common values: `fixed`, `swing`, `sliding`, `folding`.
+
+### **swing_direction**
+
+For swing doors, indicates `inward` or `outward` relative to the reference room or document convention.
+
+### **hinge_side**
+
+For swing doors, indicates the hinge side as `left` or `right` when viewed from the reference side.
+
+### **hinge_offset_mm**
+
+Optional integer (mm) giving an offset from the start of the opening to the hinge axis; useful for asymmetrical leaves and hardware placement.
+
+### **slide_direction**
+
+For sliding openings, indicates the primary travel direction of the sliding leaf when viewed from the reference side. Common values: `left-to-right`, `right-to-left`.
+
+### **slider_width_mm**
+
+Optional integer (mm) describing the width of a single sliding leaf. Useful when an opening is composed of multiple sliding leaves so renderers can place each leaf correctly.
+
+Note: `fixed_leaf_side` is unnecessary because the combination of `hinge_side` + `hinge_offset_mm` (for swing) or `slide_direction` + `slider_width_mm` (for sliding) can fully describe which leaf is fixed or mobile.
+
 ---
 
 ## Summary

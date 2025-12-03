@@ -135,6 +135,11 @@ Openings are anchored to walls and positioned along the wall length.
 {
   "id": "door_main",
   "opening_type": "door",
+  "is_fixed": false,
+  "operation": "swing",
+  "swing_direction": "inward",
+  "hinge_side": "left",
+  "hinge_offset_mm": 100,
   "in_wall": "wall_south",
   "connects_rooms": ["exterior", "room_living_01"],
   "position_along_wall_mm": 1200,
@@ -149,6 +154,16 @@ Openings are anchored to walls and positioned along the wall length.
 - Must specify position along the wall  
 - Width and height must be integers in mm  
 - For windows, additional `sill_height_mm` may be included  
+ - Optional operation and hinge metadata:
+   - `is_fixed` (boolean): true for fixed openings (non-operable windows, fixed panels). Defaults to `false` for doors.
+   - `operation` (string): one of `fixed`, `swing`, `sliding` (or `slide` as an accepted alias), `folding` — describes how the opening operates.
+   - `swing_direction` (string, for `swing`): `inward` or `outward`, the direction the leaf swings relative to the room side.
+   - `hinge_side` (string, for `swing`): `left` or `right` when looking from the reference side of the opening (document the reference convention for your tool).
+   - `hinge_offset_mm` (integer, optional): measured from the start of the opening along its width to the hinge position; useful for asymmetrical leaves or offset hardware. This and `hinge_side` together obviate the need for a separate `fixed_leaf_side` field.
+   - `slide_direction` (string, for `sliding`): `left-to-right` or `right-to-left` when viewed from the reference side; indicates the primary sliding travel direction.
+   - `slider_width_mm` (integer, optional, for `sliding`): the width of a single sliding leaf when the opening consists of sliding leaves (useful for multi-leaf sliding windows/doors).
+
+ These fields are optional and intended to help renderers and downstream tools determine door/window movement, collision checks, and accessibility. Tools that do not support operability may ignore these fields. For complex multi-leaf configurations prefer an explicit `leaves` array describing each leaf; for simpler cases `hinge_side`+`hinge_offset_mm` (swing) or `slide_direction`+`slider_width_mm` (sliding) are sufficient.
 
 ---
 
